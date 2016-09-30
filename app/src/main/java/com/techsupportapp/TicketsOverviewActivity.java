@@ -18,7 +18,6 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -54,12 +53,12 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
 
     private static Context cntxt;
 
-    public static Bundle makeSendBirdArgs(String appKey, String uuid, String nickname, boolean isAdmin) {
+    public static Bundle makeSendBirdArgs(String appKey, String uuid, String nickname, int role) {
         Bundle args = new Bundle();
         args.putString("appKey", appKey);
         args.putString("uuid", uuid);
         args.putString("nickname", nickname);
-        args.putBoolean("isAdmin", isAdmin);
+        args.putInt("isAdmin", role);
         return args;
     }
 
@@ -130,7 +129,7 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
                 if (isAdmin) {
                     for (DataSnapshot ticketRecord : dataSnapshot.child(DatabaseVariables.DATABASE_MARKED_TICKET_TABLE).getChildren()) {
                         Ticket ticket = ticketRecord.getValue(Ticket.class);
-                        if (ticket.adminId.equals(mUserId))
+                        if (ticket.getAdminId().equals(mUserId))
                             ticketsOverviewList.add(ticket);
                     }
                     adapter = new TicketAdapter(getApplicationContext(), ticketsOverviewList);
@@ -138,12 +137,12 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
                 } else {
                     for (DataSnapshot markedTicketRecord : dataSnapshot.child(DatabaseVariables.DATABASE_MARKED_TICKET_TABLE).getChildren()) {
                         Ticket markedTicket = markedTicketRecord.getValue(Ticket.class);
-                        if (markedTicket.userId.equals(mUserId))
+                        if (markedTicket.getUserId().equals(mUserId))
                             ticketsOverviewList.add(markedTicket);
                     }
                     for (DataSnapshot unMarkedTicketRecord : dataSnapshot.child(DatabaseVariables.DATABASE_UNMARKED_TICKET_TABLE).getChildren()) {
                         Ticket unMarkedTicket = unMarkedTicketRecord.getValue(Ticket.class);
-                        if (unMarkedTicket.userId.equals(mUserId))
+                        if (unMarkedTicket.getUserId().equals(mUserId))
                             ticketsOverviewList.add(unMarkedTicket);
                     }
                     adapter = new TicketAdapter(getApplicationContext(), ticketsOverviewList);
@@ -163,16 +162,16 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
                 Intent intent;
                 if (isAdmin) {
                     intent = new Intent(TicketsOverviewActivity.this, ChatActivity.class);
-                    Bundle args = ChatActivity.makeMessagingStartArgs(mAppId, mUserId, mNickname, ticketsOverviewList.get(position).userId);
+                    Bundle args = ChatActivity.makeMessagingStartArgs(mAppId, mUserId, mNickname, ticketsOverviewList.get(position).getUserId());
                     intent.putExtras(args);
                 } else {
-                    if (ticketsOverviewList.get(position).adminId == null || ticketsOverviewList.get(position).adminId.equals("")) {
+                    if (ticketsOverviewList.get(position).getAdminId() == null || ticketsOverviewList.get(position).getAdminId().equals("")) {
                         Toast.makeText(getApplicationContext(), "Администратор еще не просматривал ваше сообщение, подождите", Toast.LENGTH_LONG).show();
                         return;
                     }
                     else {
                         intent = new Intent(TicketsOverviewActivity.this, ChatActivity.class);
-                        Bundle args = ChatActivity.makeMessagingStartArgs(mAppId, mUserId, mNickname, ticketsOverviewList.get(position).adminId);
+                        Bundle args = ChatActivity.makeMessagingStartArgs(mAppId, mUserId, mNickname, ticketsOverviewList.get(position).getAdminId());
                         intent.putExtras(args);
                     }
                 }
@@ -187,8 +186,8 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
                     //что-то
                 } else {
                     //TODO вы точно хотите отозвать тикет
-                    if (ticketsOverviewList.get(position).adminId == null || ticketsOverviewList.get(position).adminId.equals(""))
-                        databaseRef.child(DatabaseVariables.DATABASE_UNMARKED_TICKET_TABLE).child(ticketsOverviewList.get(position).ticketId).removeValue();
+                    if (ticketsOverviewList.get(position).getAdminId() == null || ticketsOverviewList.get(position).getAdminId().equals(""))
+                        databaseRef.child(DatabaseVariables.DATABASE_UNMARKED_TICKET_TABLE).child(ticketsOverviewList.get(position).getTicketId()).removeValue();
                     else; //TODO проблема решена
                 }
                 return true;

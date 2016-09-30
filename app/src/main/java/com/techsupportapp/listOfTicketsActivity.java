@@ -14,7 +14,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TabHost;
 import android.widget.TextView;
@@ -190,7 +189,7 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
                     listOfSolvedTickets.add(ticket);
                 }
                 for (Ticket ticket : listOfSolvedTickets) {
-                    if (ticket.adminId.equals(mUserId))
+                    if (ticket.getAdminId().equals(mUserId))
                         listOfMyClosedTickets.add(ticket);
                 }
                 if (adapter == null) {
@@ -218,8 +217,8 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 listOfAvailableTickets.get(position).addAdmin(mUserId);
-                                databaseRef.child(DatabaseVariables.DATABASE_MARKED_TICKET_TABLE).child(listOfAvailableTickets.get(position).ticketId).setValue(listOfAvailableTickets.get(position));
-                                databaseRef.child(DatabaseVariables.DATABASE_UNMARKED_TICKET_TABLE).child(listOfAvailableTickets.get(position).ticketId).removeValue();
+                                databaseRef.child(DatabaseVariables.DATABASE_MARKED_TICKET_TABLE).child(listOfAvailableTickets.get(position).getTicketId()).setValue(listOfAvailableTickets.get(position));
+                                databaseRef.child(DatabaseVariables.DATABASE_UNMARKED_TICKET_TABLE).child(listOfAvailableTickets.get(position).getTicketId()).removeValue();
                             }
                         });
 

@@ -65,7 +65,7 @@ public class UserProfileActivity extends AppCompatActivity{
 
         editProfileBtn = (Button)findViewById(R.id.changeDataBtn);
 
-        if (!mCurrUserId.equals(mUserId) && !GlobalsMethods.isCurrentAdmin)
+        if (!mCurrUserId.equals(mUserId) && GlobalsMethods.isCurrentAdmin == User.SIMPLE_USER)
             editProfileBtn.setVisibility(View.INVISIBLE);
     }
 
@@ -123,9 +123,9 @@ public class UserProfileActivity extends AppCompatActivity{
         userId.setText(usersList.get(index).getBranchId());
         //regDate.setText(""); TODO сделать
         //workPlace.setText(""); TODO сделать
-        if (usersList.get(index).getIsAdmin())
+        if (usersList.get(index).getRole() == User.ADMINISTRATOR)
             accessLevel.setText("Администратор");
-        else
+        else if (usersList.get(index).getRole() == User.SIMPLE_USER)
             accessLevel.setText("Пользователь");
         userImage.setImageBitmap(GlobalsMethods.ImageMethods.getclip(GlobalsMethods.ImageMethods.createUserImage(userName.getText().toString(), UserProfileActivity.this)));
         setTitle("Профиль " + userName.getText().toString());

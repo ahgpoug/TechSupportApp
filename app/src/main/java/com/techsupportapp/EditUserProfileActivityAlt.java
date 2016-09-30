@@ -2,7 +2,6 @@ package com.techsupportapp;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
@@ -10,7 +9,6 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -21,7 +19,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.techsupportapp.databaseClasses.User;
 import com.techsupportapp.utility.DatabaseVariables;
-import com.techsupportapp.utility.GlobalsMethods;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -121,17 +118,30 @@ public class EditUserProfileActivityAlt extends AppCompatActivity{
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                         if (types[position].equals("Пользователь")) {
-                            if (usersList.get(userPosition).getIsAdmin()) {
-                                User chUser = new User(usersList.get(userPosition).getBranchId(), usersList.get(userPosition).getLogin(), usersList.get(userPosition).getPassword(), false);
-                                databaseRef.child(DatabaseVariables.DATABASE_VERIFIED_USER_TABLE).child(chUser.getBranchId()).setValue(chUser);
+                            if (usersList.get(userPosition).getRole() == User.SIMPLE_USER) {
+                                try {
+                                    User chUser = new User(usersList.get(userPosition).getBranchId(), usersList.get(userPosition).getLogin(), usersList.get(userPosition).getPassword(), User.SIMPLE_USER, usersList.get(userPosition).getBranchId(),
+                                            usersList.get(userPosition).getLogin(), "Wayward Pines", false);
+                                    databaseRef.child(DatabaseVariables.DATABASE_VERIFIED_USER_TABLE).child(chUser.getBranchId()).setValue(chUser);
+                                }
+                                catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+
                                 changedType = true;
                                 alertDialog.dismiss();
                                 Toast.makeText(getApplicationContext(), "Переведен в статус пользователя", Toast.LENGTH_LONG).show();
                             } else
                                 Toast.makeText(getApplicationContext(), "Уже является пользователем", Toast.LENGTH_LONG).show();
-                        } else if (!usersList.get(userPosition).getIsAdmin()) {
-                            User chUser = new User(usersList.get(userPosition).getBranchId(), usersList.get(userPosition).getLogin(), usersList.get(userPosition).getPassword(), true);
-                            databaseRef.child(DatabaseVariables.DATABASE_VERIFIED_USER_TABLE).child(chUser.getBranchId()).setValue(chUser);
+                        } else if (usersList.get(userPosition).getRole() == User.ADMINISTRATOR) {
+                            try {
+                                User chUser = new User(usersList.get(userPosition).getBranchId(), usersList.get(userPosition).getLogin(), usersList.get(userPosition).getPassword(), User.ADMINISTRATOR, usersList.get(userPosition).getBranchId(),
+                                        usersList.get(userPosition).getLogin(), "Wayward Pines", false);
+                                databaseRef.child(DatabaseVariables.DATABASE_VERIFIED_USER_TABLE).child(chUser.getBranchId()).setValue(chUser);
+                            }
+                            catch (Exception e) {
+                                e.printStackTrace();
+                            }
                             changedType = true;
                             alertDialog.dismiss();
                             Toast.makeText(getApplicationContext(), "Переведен в статус администратора", Toast.LENGTH_LONG).show();

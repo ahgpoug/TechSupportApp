@@ -40,6 +40,10 @@ public class SignUpActivity extends AppCompatActivity {
     private Button signUpBut;
 
     private EditText loginET;
+
+    private EditText userNameET;
+    private EditText workPlaceET;
+
     private EditText passwordET;
     private EditText repeatPasswordET;
 
@@ -64,6 +68,8 @@ public class SignUpActivity extends AppCompatActivity {
         signUpBut = (Button)findViewById(R.id.signUpButton);
 
         loginET = (EditText)findViewById(R.id.loginET);
+        userNameET = (EditText)findViewById(R.id.userNameET);
+        workPlaceET = (EditText)findViewById(R.id.workPlaceET);
         passwordET = (EditText)findViewById(R.id.passwordET);
         repeatPasswordET = (EditText)findViewById(R.id.repeatPasswordET);
 
@@ -92,6 +98,10 @@ public class SignUpActivity extends AppCompatActivity {
                 });
                 if (loginET.getText().toString().equals(""))
                     Toast.makeText(getApplicationContext(), "Поле логина пусто", Toast.LENGTH_LONG).show();
+                else if (userNameET.getText().toString().equals(""))
+                    Toast.makeText(getApplicationContext(), "Поле имени пользователя пусто", Toast.LENGTH_LONG).show();
+                else if (workPlaceET.getText().toString().equals(""))
+                    Toast.makeText(getApplicationContext(), "Поле рабочего места пользователя пусто", Toast.LENGTH_LONG).show();
                 else if (passwordET.getText().toString().equals(""))
                     Toast.makeText(getApplicationContext(), "Поле пароля пусто", Toast.LENGTH_LONG).show();
                 else if (!passwordET.getText().toString().equals(repeatPasswordET.getText().toString()))
@@ -100,8 +110,15 @@ public class SignUpActivity extends AppCompatActivity {
                     loginET.setText("");
                     Toast.makeText(getApplicationContext(), "Такой логин уже существует, выберите другой", Toast.LENGTH_LONG).show();
                 } else {
-                    databaseReference.child(DatabaseVariables.DATABASE_UNVERIFIED_USER_TABLE).child("user_" + userCount)
-                            .setValue(new UnverifiedUser("user_" + userCount++, loginET.getText().toString(), passwordET.getText().toString(), false));
+                    try {
+                        databaseReference.child(DatabaseVariables.DATABASE_UNVERIFIED_USER_TABLE).child("user_" + userCount)
+                                .setValue(new UnverifiedUser("user_" + userCount++, loginET.getText().toString(),
+                                        passwordET.getText().toString(), User.SIMPLE_USER, "user_" + userCount, userNameET.getText().toString(),
+                                        workPlaceET.getText().toString(), false));
+                    }
+                    catch (Exception e) {
+                        e.printStackTrace();
+                    }
                     databaseReference.child(DatabaseVariables.DATABASE_USER_INDEX_COUNTER).setValue(userCount);
                     SignUpActivity.super.finish();
                 }
@@ -114,8 +131,13 @@ public class SignUpActivity extends AppCompatActivity {
                 loginList.clear();
                 for (DataSnapshot userRecord : dataSnapshot.child(DatabaseVariables.DATABASE_VERIFIED_USER_TABLE).getChildren())
                     loginList.add(userRecord.getValue(User.class).getLogin());
-                for (DataSnapshot userRecord : dataSnapshot.child(DatabaseVariables.DATABASE_UNVERIFIED_USER_TABLE).getChildren())
-                    loginList.add(userRecord.getValue(UnverifiedUser.class).verifyUser().getLogin());
+                try {
+                    for (DataSnapshot userRecord : dataSnapshot.child(DatabaseVariables.DATABASE_UNVERIFIED_USER_TABLE).getChildren())
+                        loginList.add(userRecord.getValue(UnverifiedUser.class).verifyUser().getLogin());
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                }
                 userCount = dataSnapshot.child(DatabaseVariables.DATABASE_USER_INDEX_COUNTER).getValue(int.class);
             }
 

@@ -123,17 +123,32 @@ public class EditUserProfileActivity extends AppCompatActivity{
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                         if (types[position].equals("Пользователь")) {
-                            if (usersList.get(userPosition).getIsAdmin()) {
-                                User chUser = new User(usersList.get(userPosition).getBranchId(), usersList.get(userPosition).getLogin(), usersList.get(userPosition).getPassword(), false);
-                                databaseRef.child(DatabaseVariables.DATABASE_VERIFIED_USER_TABLE).child(chUser.getBranchId()).setValue(chUser);
+                            if (usersList.get(userPosition).getRole() != User.SIMPLE_USER) {
+                                User chUser;
+                                try {
+                                    chUser = new User(usersList.get(userPosition).getBranchId(), usersList.get(userPosition).getLogin(), usersList.get(userPosition).getPassword(), User.SIMPLE_USER, usersList.get(userPosition).getBranchId(),
+                                            usersList.get(userPosition).getLogin(), "Wayward Pines", false);
+                                    databaseRef.child(DatabaseVariables.DATABASE_VERIFIED_USER_TABLE).child(chUser.getBranchId()).setValue(chUser);
+                                }
+                                catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+
                                 changedType = true;
                                 alertDialog.dismiss();
                                 Toast.makeText(getApplicationContext(), "Переведен в статус пользователя", Toast.LENGTH_LONG).show();
                             } else
                                 Toast.makeText(getApplicationContext(), "Уже является пользователем", Toast.LENGTH_LONG).show();
-                        } else if (!usersList.get(userPosition).getIsAdmin()) {
-                            User chUser = new User(usersList.get(userPosition).getBranchId(), usersList.get(userPosition).getLogin(), usersList.get(userPosition).getPassword(), true);
-                            databaseRef.child(DatabaseVariables.DATABASE_VERIFIED_USER_TABLE).child(chUser.getBranchId()).setValue(chUser);
+                        } else if (usersList.get(userPosition).getRole() != User.ADMINISTRATOR) {
+                            User chUser;
+                            try {
+                                chUser = new User(usersList.get(userPosition).getBranchId(), usersList.get(userPosition).getLogin(), usersList.get(userPosition).getPassword(), User.ADMINISTRATOR, usersList.get(userPosition).getBranchId(),
+                                        usersList.get(userPosition).getLogin(), "Wayward Pines", false);
+                                databaseRef.child(DatabaseVariables.DATABASE_VERIFIED_USER_TABLE).child(chUser.getBranchId()).setValue(chUser);
+                            }
+                            catch (Exception e) {
+                                e.printStackTrace();
+                            }
                             changedType = true;
                             alertDialog.dismiss();
                             Toast.makeText(getApplicationContext(), "Переведен в статус администратора", Toast.LENGTH_LONG).show();
@@ -207,8 +222,14 @@ public class EditUserProfileActivity extends AppCompatActivity{
                             Toast.makeText(getApplicationContext(), "Пароли должны содержать только английские символы и цифры", Toast.LENGTH_LONG).show();
                         else
                         {
-                            User chUser = new User(usersList.get(userPosition).getBranchId(), usersList.get(userPosition).getLogin(), newPasswordRepeat.getText().toString(), usersList.get(userPosition).getIsAdmin());
-                            databaseRef.child(DatabaseVariables.DATABASE_VERIFIED_USER_TABLE).child(chUser.getBranchId()).setValue(chUser);
+                            try {
+                                User chUser = new User(usersList.get(userPosition).getBranchId(), usersList.get(userPosition).getLogin(), newPasswordRepeat.getText().toString(), usersList.get(userPosition).getRole(), usersList.get(userPosition).getBranchId(),
+                                        usersList.get(userPosition).getLogin(), "Wayward Pines", false);
+                                databaseRef.child(DatabaseVariables.DATABASE_VERIFIED_USER_TABLE).child(chUser.getBranchId()).setValue(chUser);
+                            }
+                            catch (Exception e) {
+                                e.printStackTrace();
+                            }
                             Toast.makeText(getApplicationContext(), "Пароль успешно изменен", Toast.LENGTH_LONG).show();
                             alertDialog.dismiss();
                         }
@@ -251,7 +272,7 @@ public class EditUserProfileActivity extends AppCompatActivity{
             }
         });
 
-        if (!GlobalsMethods.isCurrentAdmin)
+        if (GlobalsMethods.isCurrentAdmin == User.SIMPLE_USER)
             changeUserTypeBtn.setVisibility(View.INVISIBLE);
 
         userName.setText(usersList.get(userPosition).getLogin());

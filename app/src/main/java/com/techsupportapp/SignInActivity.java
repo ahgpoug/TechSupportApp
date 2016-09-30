@@ -157,19 +157,19 @@ public class SignInActivity extends AppCompatActivity {
 
                             userName = loginET.getText().toString();
 
-                            if (userList.get(i).getIsAdmin()) {
+                            if (userList.get(i).getRole() == User.ADMINISTRATOR) {
                                 intent = new Intent(SignInActivity.this, TicketsOverviewActivity.class);
                             }
                             else {
                                 intent = new Intent(SignInActivity.this, TicketsOverviewActivity.class);
                             }
 
-                            Bundle args = TicketsOverviewActivity.makeSendBirdArgs(appId, getId(userName), userName, userList.get(i).getIsAdmin());
+                            Bundle args = TicketsOverviewActivity.makeSendBirdArgs(appId, getId(userName), userName, userList.get(i).getRole());
 
                             intent.putExtras(args);
                             savePassAndLogin();
                             GlobalsMethods.currUserId = userName;
-                            GlobalsMethods.isCurrentAdmin = userList.get(i).getIsAdmin();
+                            GlobalsMethods.isCurrentAdmin = userList.get(i).getRole();
                             startActivity(intent);
                         }
                         else

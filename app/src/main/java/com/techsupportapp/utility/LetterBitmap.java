@@ -81,23 +81,12 @@ public class LetterBitmap {
         c.setBitmap(bitmap);
         c.drawColor(pickColor(key));
 
-        /*if (!isEnglishLetterOrDigit(firstChar)) {
-            firstChar = 'Z';
-        }*/
-
         mFirstChar[0] = Character.toUpperCase(firstChar);
         mPaint.setTextSize(mTileLetterFontSize);
         mPaint.getTextBounds(mFirstChar, 0, 1, mBounds);
         c.drawText(mFirstChar, 0, 1, 0 + width / 2, 0 + height / 2 + (mBounds.bottom - mBounds.top) / 2, mPaint);
         return bitmap;
     }
-
-    /**
-     * @param c The char to check
-     * @return True if <code>c</code> is in the English alphabet or is a digit,
-     * false otherwise
-     */
-
 
     /**
      * @param key The key used to generate the tile color

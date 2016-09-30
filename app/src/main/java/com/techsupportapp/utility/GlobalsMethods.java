@@ -20,7 +20,7 @@ public class GlobalsMethods {
      */
     public static String currUserId;
 
-    public static boolean isCurrentAdmin;
+    public static int isCurrentAdmin;
 
     public static void showAbout(Context context) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
@@ -66,7 +66,6 @@ public class GlobalsMethods {
     public static class ImageMethods {
         /**
          * Метод, создающий картинку пользователя с первой буквой его имени по центру.
-         *
          * @param name Отображаемое имя пользователя.
          * @param context Контекст вызывающего класса.
          * @return Возвращает картинку (класс Bitmap) с первой буквой имени пользователя по центру.
@@ -80,7 +79,6 @@ public class GlobalsMethods {
 
         /**
          * Метод, задающий округлую форму картинки.
-         *
          * @param bitmap Изображение, форму которого необходимо изменить.
          * @return Возвращает закругленную картинку (класс Bitmap).
          */

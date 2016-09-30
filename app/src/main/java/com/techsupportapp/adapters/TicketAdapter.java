@@ -12,6 +12,7 @@ import android.widget.TextView;
 import com.techsupportapp.R;
 import com.techsupportapp.UserProfileActivity;
 import com.techsupportapp.databaseClasses.Ticket;
+import com.techsupportapp.databaseClasses.User;
 import com.techsupportapp.utility.GlobalsMethods;
 
 import java.util.ArrayList;
@@ -39,29 +40,29 @@ public class TicketAdapter extends ArrayAdapter<Ticket> {
         TextView topicText = (TextView)rowView.findViewById(R.id.ticketTopic);
         TextView descText = (TextView)rowView.findViewById(R.id.ticketDesc);
 
-        userId = values.get(position).userId;
-        if (values.get(position).adminId == null || values.get(position).adminId.equals("")) {
-            if (GlobalsMethods.isCurrentAdmin)
-                authorText.setText(values.get(position).userId);
+        userId = values.get(position).getUserId();
+        if (values.get(position).getAdminId() == null || values.get(position).getAdminId().equals("")) {
+            if (GlobalsMethods.isCurrentAdmin == User.ADMINISTRATOR)
+                authorText.setText(values.get(position).getUserId());
             else
                 authorText.setText("Не установлено");
 
             titleText = authorText.getText().toString();
         }
         else {
-            if (GlobalsMethods.isCurrentAdmin) {
-                authorText.setText(values.get(position).userId + " ✔");
-                titleText = values.get(position).userId;
+            if (GlobalsMethods.isCurrentAdmin == User.ADMINISTRATOR) {
+                authorText.setText(values.get(position).getUserId() + " ✔");
+                titleText = values.get(position).getUserId();
             }
             else {
-                authorText.setText(values.get(position).adminId + " ✔");
-                titleText = values.get(position).adminId;
+                authorText.setText(values.get(position).getAdminId() + " ✔");
+                titleText = values.get(position).getAdminId();
             }
         }
 
-        dateText.setText(values.get(position).date);
-        topicText.setText(values.get(position).topic);
-        descText.setText(values.get(position).message);
+        dateText.setText(values.get(position).getCreateDate());
+        topicText.setText(values.get(position).getTopic());
+        descText.setText(values.get(position).getMessage());
         ticketImage.setImageBitmap(GlobalsMethods.ImageMethods.createUserImage(titleText, context));
 
         ticketImage.setOnClickListener(new View.OnClickListener() {
@@ -69,7 +70,7 @@ public class TicketAdapter extends ArrayAdapter<Ticket> {
             public void onClick(View v) {
                 boolean fl = true;
                 Intent intent = new Intent(context, UserProfileActivity.class);
-                if (GlobalsMethods.isCurrentAdmin)
+                if (GlobalsMethods.isCurrentAdmin == User.ADMINISTRATOR)
                     intent.putExtra("userId", userId);
                 else
                     if (titleText.equals("Не установлено"))

@@ -11,6 +11,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -163,7 +164,12 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         search = false;
-                        databaseRef.child(DatabaseVariables.DATABASE_VERIFIED_USER_TABLE).child(unverifiedUsersList.get(position).getBranchId()).setValue(unverifiedUsersList.get(position).verifyUser());
+                        try {
+                            databaseRef.child(DatabaseVariables.DATABASE_VERIFIED_USER_TABLE).child(unverifiedUsersList.get(position).getBranchId()).setValue(unverifiedUsersList.get(position).verifyUser());
+                        }
+                        catch (Exception e) {
+                            e.printStackTrace();
+                        }
                         databaseRef.child(DatabaseVariables.DATABASE_UNVERIFIED_USER_TABLE).child(unverifiedUsersList.get(position).getBranchId()).removeValue();
                         Toast.makeText(getApplicationContext(), "Пользователь добавлен в базу данных", Toast.LENGTH_LONG).show();
                         searchView.setQuery(searchView.getQuery().toString() + "", false);
