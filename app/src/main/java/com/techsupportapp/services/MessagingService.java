@@ -128,8 +128,7 @@ public class MessagingService extends Service {
     }
 
     @Override
-    public void onDestroy()
-    {
+    public void onDestroy() {
         if (Globals.currentUser.getRole() == User.SIMPLE_USER)
             for (int i = 0; i < counterList.size(); i++)
                 databaseRef.child("chat").child(counterList.get(i).ticketId).removeEventListener(childEventListener);

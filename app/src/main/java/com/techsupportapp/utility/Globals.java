@@ -36,7 +36,7 @@ public class Globals {
 
     /**
      * Метод, вызывающий информацию о приложении.
-     * @param context Контекст вызывающего класса.
+     * @param context Контекст вызывающей Activity.
      * @param t id типа заявки
      */
     public static String getTicketTypeName(Context context, int t){
@@ -44,6 +44,11 @@ public class Globals {
         return groups[t - 10];
     }
 
+    /**
+     * Метод, вызывающий клавиатуру на EditText.
+     * @param context Контекст вызывающей Activity.
+     * @param editText EditText, на который вызывается клавиатура.
+     */
     public static void showKeyboardOnEditText(Context context, EditText editText){
         InputMethodManager imm = (InputMethodManager)context.getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT);
@@ -70,6 +75,10 @@ public class Globals {
         Toast.makeText(context, message, Toast.LENGTH_LONG).show();
     }
 
+    /**
+     * Метод, проверяющий слово на содержание только английских символов и цифр.
+     * @param word проверяемое слово.
+     */
     public static boolean isEnglishWord(String word){
         for (int i = 0; i < word.length(); i++)
             if (!isEnglishLetterOrDigit(word.charAt(i)))
@@ -84,6 +93,7 @@ public class Globals {
     public static class ImageMethods {
         /**
          * Метод, создающий квадратную картинку первой
+         * @param context Контекст Activity.
          * @param name Отображаемое имя.
          * @return Возвращает картинку (класс TextDrawable) с первой буквой по центру.
          */
@@ -103,6 +113,7 @@ public class Globals {
 
         /**
          * Метод, создающий круглую картинку первой
+         * @param context Контекст Activity.
          * @param name Отображаемое имя.
          * @return Возвращает картинку (класс TextDrawable) с первой буквой по центру.
          */
