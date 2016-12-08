@@ -32,7 +32,7 @@ public class DatabaseStorage {
     public static int ACTION_REQUEST_REJECTED = 6;
     public static int ACTION_REQUEST_ACCEPTED = 7;
 
-    public static void updateLogFile(Context context, String ticketId, final int action, final User currentUser){
+    public static void updateLogFile(Context context, String ticketId, final int action, final User currentUser, final String user){
         final StorageReference storageReference = FirebaseStorage.getInstance().getReference("logs").child(ticketId + ".log");
 
         try {
@@ -42,13 +42,13 @@ public class DatabaseStorage {
                 @Override
                 public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
                     Log.e("Error", "Successful download");
-                    uploadFile(storageReference, localFile, action, currentUser);
+                    uploadFile(storageReference, localFile, action, currentUser, user);
                 }
             }).addOnFailureListener(new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception exception) {
                     Log.e("Error", "Error occurred while downloading");
-                    uploadFile(storageReference, localFile, action, currentUser);
+                    uploadFile(storageReference, localFile, action, currentUser, user);
                 }
             });
         } catch (IOException e){
@@ -56,7 +56,7 @@ public class DatabaseStorage {
         }
     }
 
-    private static void uploadFile(StorageReference storageReference, File file, int action, User currentUser){
+    private static void uploadFile(StorageReference storageReference, File file, int action, User currentUser, String user){
         try {
             SimpleDateFormat formatter = new SimpleDateFormat("HH:mm, MMM dd yyyy", Locale.ENGLISH);
             String currentTime = formatter.format(Calendar.getInstance().getTime());
@@ -65,7 +65,7 @@ public class DatabaseStorage {
             if (action == ACTION_CREATED)
                 text = ": заявка создана пользователем ";
             else if (action == ACTION_ACCEPTED)
-                text = ": заявка принята пользователем ";
+                text = ": заявка назанчена пользователю " + user + " пользователем ";
             else if (action == ACTION_CLOSED)
                 text = ": заявка закрыта пользователем ";
             else if (action == ACTION_SOLVED)

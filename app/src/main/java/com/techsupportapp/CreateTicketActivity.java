@@ -132,7 +132,7 @@ public class CreateTicketActivity extends AppCompatActivity{
                         ticketIndexReference.setValue(ticketCount);
                         Toast.makeText(getApplicationContext(), "Заявка добалена", Toast.LENGTH_LONG).show();
 
-                        DatabaseStorage.updateLogFile(CreateTicketActivity.this, newTicket.getTicketId(), DatabaseStorage.ACTION_CREATED, Globals.currentUser);
+                        DatabaseStorage.updateLogFile(CreateTicketActivity.this, newTicket.getTicketId(), DatabaseStorage.ACTION_CREATED, Globals.currentUser, null);
 
                         finish();
                     }

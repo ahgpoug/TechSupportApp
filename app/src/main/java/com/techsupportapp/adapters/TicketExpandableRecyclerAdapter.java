@@ -208,7 +208,7 @@ public class TicketExpandableRecyclerAdapter extends ExpandableRecyclerAdapter<T
                                     @Override
                                     public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                                         //TODO сделать отзыв заявки обратно в пул
-                                        DatabaseStorage.updateLogFile(context, currentTicket.getTicketId(), DatabaseStorage.ACTION_WITHDRAWN, Globals.currentUser);
+                                        DatabaseStorage.updateLogFile(context, currentTicket.getTicketId(), DatabaseStorage.ACTION_WITHDRAWN, Globals.currentUser, null);
                                     }
                                 })
                                 .onNegative(new MaterialDialog.SingleButtonCallback() {
@@ -306,8 +306,7 @@ public class TicketExpandableRecyclerAdapter extends ExpandableRecyclerAdapter<T
                                         } else {
                                             Intent intent = new Intent(context, MessagingActivity.class);
                                             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                            intent.putExtra("chatRoom", currentTicket.getTicketId());
-                                            intent.putExtra("topic", currentTicket.getTopic());
+                                            intent.putExtra("currentTicket", (Serializable) currentTicket);
                                             intent.putExtra("isActive", false);
                                             context.startActivity(intent);
                                         }

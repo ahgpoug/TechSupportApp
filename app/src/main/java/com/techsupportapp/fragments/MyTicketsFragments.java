@@ -28,6 +28,7 @@ import com.techsupportapp.utility.DatabaseVariables;
 import com.techsupportapp.utility.Globals;
 import com.techsupportapp.utility.ItemClickSupport;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
@@ -155,8 +156,7 @@ public class MyTicketsFragments {
                 public void onItemClicked(RecyclerView recyclerView, int position, View v) {
                     Intent intent = new Intent(context, MessagingActivity.class);
                     if (role != User.SIMPLE_USER) {
-                        intent.putExtra("chatRoom", ticketsList.get(position).getTicketId());
-                        intent.putExtra("topic", ticketsList.get(position).getTopic());
+                        intent.putExtra("currentTicket", (Serializable) ticketsList.get(position));
                         intent.putExtra("isActive", true);
                     }
                     else {
@@ -165,8 +165,7 @@ public class MyTicketsFragments {
                             return;
                         }
                         else {
-                            intent.putExtra("chatRoom", ticketsList.get(position).getTicketId());
-                            intent.putExtra("topic", ticketsList.get(position).getTopic());
+                            intent.putExtra("currentTicket", (Serializable) ticketsList.get(position));
                             intent.putExtra("isActive", true);
                         }
                     }
@@ -190,7 +189,7 @@ public class MyTicketsFragments {
                                         public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                                             DatabaseReference databaseTicketReference = FirebaseDatabase.getInstance().getReference(DatabaseVariables.FullPath.Tickets.DATABASE_ALL_TICKET_TABLE);
                                             databaseTicketReference.child(DatabaseVariables.ExceptFolder.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child(selectedTicket.getTicketId()).removeValue();
-                                            DatabaseStorage.updateLogFile(context, selectedTicket.getTicketId(), DatabaseStorage.ACTION_CLOSED, Globals.currentUser);
+                                            DatabaseStorage.updateLogFile(context, selectedTicket.getTicketId(), DatabaseStorage.ACTION_CLOSED, Globals.currentUser, null);
                                         }
                                     })
                                     .onNegative(new MaterialDialog.SingleButtonCallback() {
@@ -213,7 +212,7 @@ public class MyTicketsFragments {
                                             DatabaseReference databaseTicketReference = FirebaseDatabase.getInstance().getReference(DatabaseVariables.FullPath.Tickets.DATABASE_ALL_TICKET_TABLE);
                                             databaseTicketReference.child(DatabaseVariables.ExceptFolder.Tickets.DATABASE_SOLVED_TICKET_TABLE).child(selectedTicket.getTicketId()).setValue(selectedTicket);
                                             databaseTicketReference.child(DatabaseVariables.ExceptFolder.Tickets.DATABASE_MARKED_TICKET_TABLE).child(selectedTicket.getTicketId()).removeValue();
-                                            DatabaseStorage.updateLogFile(context, selectedTicket.getTicketId(), DatabaseStorage.ACTION_SOLVED, Globals.currentUser);
+                                            DatabaseStorage.updateLogFile(context, selectedTicket.getTicketId(), DatabaseStorage.ACTION_SOLVED, Globals.currentUser, null);
                                         }
                                     })
                                     .onNegative(new MaterialDialog.SingleButtonCallback() {
@@ -280,12 +279,10 @@ public class MyTicketsFragments {
                 public void onItemClicked(RecyclerView recyclerView, int position, View v) {
                     Intent intent = new Intent(context, MessagingActivity.class);
                     if (role != User.SIMPLE_USER) {
-                        intent.putExtra("chatRoom", ticketsList.get(position).getTicketId());
-                        intent.putExtra("topic", ticketsList.get(position).getTopic());
+                        intent.putExtra("currentTicket", (Serializable) ticketsList.get(position));
                         intent.putExtra("isActive", false);
                     } else {
-                        intent.putExtra("chatRoom", ticketsList.get(position).getTicketId());
-                        intent.putExtra("topic", ticketsList.get(position).getTopic());
+                        intent.putExtra("currentTicket", (Serializable) ticketsList.get(position));
                         intent.putExtra("isActive", false);
                     }
                     startActivity(intent);

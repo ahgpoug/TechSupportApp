@@ -1,5 +1,6 @@
 package com.techsupportapp.adapters;
 
+import android.app.Activity;
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -13,10 +14,14 @@ import android.widget.TextView;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.techsupportapp.R;
 import com.techsupportapp.databaseClasses.ChatMessage;
+import com.techsupportapp.databaseClasses.Ticket;
 import com.techsupportapp.utility.DatabaseStorage;
+import com.techsupportapp.utility.DatabaseVariables;
 import com.techsupportapp.utility.Globals;
 
 import java.util.ArrayList;
@@ -30,14 +35,16 @@ public class ChatRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     private static final int TYPE_REQUEST_OUT = 3;
 
     private Query mRef;
+    private Ticket selectedTicket;
     private Context context;
     private List<ChatMessage> chatMessages;
     private List<String> keys;
     private ChildEventListener childEventListener;
 
-    public ChatRecyclerAdapter(final Query mRef, final Context context) {
+    public ChatRecyclerAdapter(final Query mRef, final Context context, final Ticket selectedTicket) {
         this.mRef = mRef;
         this.context = context;
+        this.selectedTicket = selectedTicket;
         chatMessages = new ArrayList<>();
         keys = new ArrayList<>();
 
@@ -219,7 +226,7 @@ public class ChatRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                             holder.rejectRequest.setText("Запрос отклонен");
                             holder.rejectRequest.setVisibility(View.GONE);
                             holder.acceptRequest.setVisibility(View.GONE);
-                            DatabaseStorage.updateLogFile(context, mRef.getRef().getKey(), DatabaseStorage.ACTION_REQUEST_REJECTED, Globals.currentUser);
+                            DatabaseStorage.updateLogFile(context, mRef.getRef().getKey(), DatabaseStorage.ACTION_REQUEST_REJECTED, Globals.currentUser, null);
                         }
                     });
 
@@ -230,8 +237,15 @@ public class ChatRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                             holder.rejectRequest.setText("Запрос принят");
                             holder.rejectRequest.setVisibility(View.GONE);
                             holder.acceptRequest.setVisibility(View.GONE);
-                            //TODO сделать закрытие заявки
-                            DatabaseStorage.updateLogFile(context, mRef.getRef().getKey(), DatabaseStorage.ACTION_REQUEST_ACCEPTED, Globals.currentUser);
+
+                            DatabaseReference databaseTicketReference = FirebaseDatabase.getInstance().getReference(DatabaseVariables.FullPath.Tickets.DATABASE_ALL_TICKET_TABLE);
+                            databaseTicketReference.child(DatabaseVariables.ExceptFolder.Tickets.DATABASE_SOLVED_TICKET_TABLE).child(selectedTicket.getTicketId()).setValue(selectedTicket);
+                            databaseTicketReference.child(DatabaseVariables.ExceptFolder.Tickets.DATABASE_MARKED_TICKET_TABLE).child(selectedTicket.getTicketId()).removeValue();
+                            DatabaseStorage.updateLogFile(context, selectedTicket.getTicketId(), DatabaseStorage.ACTION_SOLVED, Globals.currentUser, null);
+
+                            DatabaseStorage.updateLogFile(context, mRef.getRef().getKey(), DatabaseStorage.ACTION_REQUEST_ACCEPTED, Globals.currentUser, null);
+
+                            ((Activity) context).finish();
                         }
                     });
                 } else {

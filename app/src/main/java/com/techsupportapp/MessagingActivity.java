@@ -1,6 +1,7 @@
 package com.techsupportapp;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -16,17 +17,29 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FileDownloadTask;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.techsupportapp.adapters.ChatRecyclerAdapter;
 import com.techsupportapp.databaseClasses.ChatMessage;
+import com.techsupportapp.databaseClasses.Ticket;
 import com.techsupportapp.databaseClasses.User;
 import com.techsupportapp.utility.DatabaseStorage;
 import com.techsupportapp.utility.Globals;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
@@ -40,6 +53,7 @@ public class MessagingActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
 
     private String mChatRoom;
+    private Ticket currentTicket;
     private String topic;
     private boolean isActive;
 
@@ -53,8 +67,8 @@ public class MessagingActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_messaging);
 
-        mChatRoom = getIntent().getExtras().getString("chatRoom");
-        topic = getIntent().getExtras().getString("topic");
+        currentTicket = (Ticket) getIntent().getExtras().getSerializable("currentTicket");
+
         isActive = getIntent().getExtras().getBoolean("isActive");
 
         showLoadingDialog();
@@ -63,6 +77,9 @@ public class MessagingActivity extends AppCompatActivity {
     }
 
     private void initializeComponents() {
+        mChatRoom = currentTicket.getTicketId();
+        topic = currentTicket.getTopic();
+
         databaseReference = FirebaseDatabase.getInstance().getReference("chat").child(mChatRoom);
         inputText = (EditText) findViewById(R.id.messageInput);
         sendBtn = (ImageButton) findViewById(R.id.sendButton);
@@ -112,7 +129,7 @@ public class MessagingActivity extends AppCompatActivity {
         recyclerView = (RecyclerView) findViewById(R.id.listChat);
         LinearLayoutManager mLayoutManager = new LinearLayoutManager(MessagingActivity.this, LinearLayoutManager.VERTICAL, false);
         recyclerView.setLayoutManager(mLayoutManager);
-        chatRecyclerAdapter = new ChatRecyclerAdapter(databaseReference.limitToLast(150), MessagingActivity.this);
+        chatRecyclerAdapter = new ChatRecyclerAdapter(databaseReference.limitToLast(150), MessagingActivity.this, currentTicket);
         recyclerView.setAdapter(chatRecyclerAdapter);
         chatRecyclerAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
             @Override
@@ -166,8 +183,11 @@ public class MessagingActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        if (Globals.currentUser.getRole() != User.SIMPLE_USER && isActive)
-            inflater.inflate(R.menu.menu_messaging, menu);
+        inflater.inflate(R.menu.menu_messaging, menu);
+        if (!isActive)
+            menu.findItem(R.id.action_send_request).setVisible(false);
+        if (Globals.currentUser.getRole() == User.SIMPLE_USER)
+            menu.findItem(R.id.action_send_request).setVisible(false);
         return true;
     }
 
@@ -180,10 +200,56 @@ public class MessagingActivity extends AppCompatActivity {
             SimpleDateFormat formatter = new SimpleDateFormat("HH:mm, MMM dd", Locale.ENGLISH);
             String messageTime = formatter.format(Calendar.getInstance().getTime());
 
-            DatabaseStorage.updateLogFile(MessagingActivity.this, mChatRoom, DatabaseStorage.ACTION_REQUESTED_TO_CLOSE, Globals.currentUser);
+            DatabaseStorage.updateLogFile(MessagingActivity.this, mChatRoom, DatabaseStorage.ACTION_REQUESTED_TO_CLOSE, Globals.currentUser, null);
 
             ChatMessage chatMessage = new ChatMessage("not answered", "System", Globals.currentUser.getLogin(), messageTime, true);
             databaseReference.push().setValue(chatMessage);
+        } else if (id == R.id.action_show_info){
+            final MaterialDialog materialDialog = new MaterialDialog.Builder(MessagingActivity.this)
+                    .title("Лог")
+                    .content("Загрузка...")
+                    .positiveText("Ок")
+                    .show();
+
+            final StorageReference storageReference = FirebaseStorage.getInstance().getReference("logs").child(mChatRoom + ".log");
+            try {
+                final File localFile = File.createTempFile(mChatRoom, "log");
+
+                storageReference.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                        try {
+                            FileInputStream fis = new FileInputStream(localFile);
+                            BufferedReader br = new BufferedReader(new InputStreamReader(fis));
+
+                            String result = "";
+                            String line = null;
+                            while ((line = br.readLine()) != null) {
+                                result += line;
+                                result += "\n";
+                            }
+                            br.close();
+
+                            result = result.substring(0, result.length()-2);
+                            result = result.replaceAll(": ", ":\n");
+                            materialDialog.setContent(result);
+                        } catch (FileNotFoundException e){
+                            e.printStackTrace();
+                            materialDialog.setContent("Ошибка загрузки");
+                        } catch (IOException e){
+                            e.printStackTrace();
+                            materialDialog.setContent("Ошибка загрузки");
+                        }
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception exception) {
+                        materialDialog.setContent("Ошибка загрузки");
+                    }
+                });
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         return super.onOptionsItemSelected(item);
     }

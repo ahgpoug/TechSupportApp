@@ -4,5 +4,11 @@
     <item
         android:id="@+id/action_send_request"
         android:title="Отправить запрос на закрытие заявки"
-        app:showAsAction="never" />
-</menu>
+        android:icon="@drawable/ic_question_answer_white_24dp"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_show_info"
+        android:title="Информация"
+        android:icon="@drawable/ic_info_outline_white_24dp"
+        app:showAsAction="always" />
+    </menu>

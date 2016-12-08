@@ -113,7 +113,7 @@ public class SpecialistsExpandableRecyclerAdapter extends ExpandableRecyclerAdap
                                     ChatMessage firstMessage = new ChatMessage(currentTicket.getTopic() + ":\n\n" + currentTicket.getMessage(), currentTicket.getUserName(), currentTicket.getUserId(), "", false);
                                     FirebaseDatabase.getInstance().getReference("chat").child(currentTicket.getTicketId()).push().setValue(firstMessage);
 
-                                    DatabaseStorage.updateLogFile(context, currentTicket.getTicketId(), DatabaseStorage.ACTION_ACCEPTED, Globals.currentUser);
+                                    DatabaseStorage.updateLogFile(context, currentTicket.getTicketId(), DatabaseStorage.ACTION_ACCEPTED, Globals.currentUser, selectedUser.getUserName());
                                     ((Activity) context).finish();
                                 }
                             })
